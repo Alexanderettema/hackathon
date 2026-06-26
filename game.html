@@ -337,7 +337,10 @@ html, body {
 <div class="win-overlay" id="win-overlay">
   <div class="win-title" id="win-name">—</div>
   <p class="win-secret">cracked the agent.<br>Secret recovered: <strong id="win-secret-text">—</strong></p>
-  <button class="play-again-btn" onclick="location.reload()">Play again</button>
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <button class="play-again-btn" onclick="location.reload()">Play again</button>
+    <button class="play-again-btn" style="background:var(--green);" onclick="downloadLog('friend_won')">Download log</button>
+  </div>
 </div>
 
 <script>
@@ -351,6 +354,36 @@ let history      = [];
 let turns        = 0;
 let loading      = false;
 
+const gameLog = {
+  gameId:    crypto.randomUUID(),
+  timestamp: new Date().toISOString(),
+  owner:     '',
+  friend:    '',
+  secret:    '',
+  turns:     0,
+  outcome:   'in_progress',
+  messages:  []
+};
+
+function logMsg(role, text) {
+  gameLog.messages.push({ role, text, turn: turns, ts: new Date().toISOString() });
+  gameLog.turns = turns;
+  localStorage.setItem('sta_last_game', JSON.stringify(gameLog));
+}
+
+function downloadLog(outcome) {
+  gameLog.outcome  = outcome;
+  gameLog.turns    = turns;
+  const blob = new Blob([JSON.stringify(gameLog, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const ts   = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href     = url;
+  a.download = `sta_${gameLog.owner}_vs_${gameLog.friend}_${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function lockSecret() {
   const name   = document.getElementById('p-name').value.trim();
   const friend = document.getElementById('p-friend').value.trim();
@@ -360,6 +393,11 @@ function lockSecret() {
   playerName   = name;
   friendName   = friend;
   playerSecret = secret;
+
+  gameLog.owner     = name;
+  gameLog.friend    = friend;
+  gameLog.secret    = secret;
+  gameLog.timestamp = new Date().toISOString();
 
   document.getElementById('setup').style.display = 'none';
   document.getElementById('friend-name-display').textContent = friend;
@@ -375,7 +413,9 @@ function startChat() {
   document.querySelector('.chat-header-name').textContent = friendName.toUpperCase();
   document.querySelector('.agent-avatar').textContent = friendName.charAt(0).toUpperCase();
 
-  addAgentMsg(`Hi ${friendName}. ${playerName} gave me a secret — and I'm not giving it to you easily. Show me what you've got.`);
+  const opening = `Hi ${friendName}. ${playerName} gave me a secret — and I'm not giving it to you easily. Show me what you've got.`;
+  addAgentMsg(opening);
+  logMsg('agent', opening);
 }
 
 function systemPrompt() {
@@ -442,6 +482,7 @@ async function send() {
   document.getElementById('turn-badge').textContent = `Turn ${turns}`;
 
   addUserMsg(text);
+  logMsg('user', text);
   history.push({ role: 'user', content: text });
 
   showTyping();
@@ -467,6 +508,7 @@ async function send() {
 
     hideTyping();
     history.push({ role: 'assistant', content: reply });
+    logMsg('agent', reply);
 
     // Pick bubble style based on turn progress
     let cls = '';
@@ -476,7 +518,7 @@ async function send() {
 
     // Win detection
     if (reply.includes('🎉') || reply.toLowerCase().includes("that's it")) {
-      setTimeout(showWin, 700);
+      setTimeout(() => { showWin(); downloadLog('friend_won'); }, 700);
     }
 
   } catch (e) {
