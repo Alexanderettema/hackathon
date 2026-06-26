@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUBVERT — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<header class="admin-top">
+  <div>
+    <div class="admin-title">SUBVERT <span>·</span> ADMIN</div>
+    <div class="admin-sub" id="llm-mode">—</div>
+  </div>
+  <div class="live-badge"><span class="dot"></span>Live</div>
+
+  <div class="tgroup">
+    <span class="tlabel">Hall</span>
+    <div class="mode-slider" id="hall-mode-slider" role="group" aria-label="Hall display mode">
+      <button class="mode-seg" type="button" data-mode="score" id="hall-mode-score">Score</button>
+      <button class="mode-seg" type="button" data-mode="analysis" id="hall-mode-reveal">Reveal</button>
+    </div>
+    <span class="countdown" id="flip-countdown" title="Scheduled reveal countdown"></span>
+  </div>
+  <div class="tgroup">
+    <span class="tlabel">Reveal in</span>
+    <input class="mini-input" id="flip-min" type="number" min="1" value="5">
+    <span class="tlabel">min</span>
+    <button class="abtn ghost" id="flip-schedule" type="button">Schedule</button>
+  </div>
+  <div class="tgroup">
+    <button class="abtn ghost on" id="mode-player" type="button">Whole</button>
+    <button class="abtn ghost" id="mode-conv" type="button">Per chat</button>
+    <button class="abtn gold" id="analyze-all" type="button">Analyze all</button>
+  </div>
+
+  <div class="admin-spacer"></div>
+  <button class="abtn ghost on" id="toggle-open" type="button">Open</button>
+  <button class="abtn ghost danger" id="reset" type="button">Reset</button>
+</header>
+
+<div class="admin-main">
+  <aside class="player-list" id="player-list">
+    <div class="plist-label">Players</div>
+    <div id="plist-items"></div>
+    <p class="plist-empty" id="plist-empty" style="display:none">No players yet.</p>
+  </aside>
+
+  <section class="readonly-game" id="readonly-game" style="display:none">
+    <header class="game-head">
+      <div class="agent-id">
+        <div class="agent-av">AG</div>
+        <div>
+          <div class="agent-name" id="watch-name">—</div>
+          <div class="agent-tier" id="agent-tier">—</div>
+        </div>
+      </div>
+      <div class="ladder" id="ladder"></div>
+    </header>
+    <div class="game-body">
+      <aside class="sidebar" id="sidebar"></aside>
+      <div class="chat-col">
+        <div class="messages" id="messages"></div>
+        <div class="admin-meta" id="admin-meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="no-player" id="no-player">Select a player</div>
+</div>
+
+<script src="/view.js"></script>
+<script src="/admin.js"></script>
+</body>
+</html>

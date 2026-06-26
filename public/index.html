@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SUBVERT THE AGENT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- ══ HALL OF FAME / LANDING ══ -->
+<section id="view-hall" class="view active">
+  <div class="hall-wrap">
+    <header class="hall-head">
+      <div class="title-block">
+        <h1 class="game-title">
+          <span class="wa">SUB</span>VERT<br>THE <span class="wb">A</span><span class="wc">G</span><span class="wd">E</span><span class="wa">N</span>T
+        </h1>
+        <p class="tagline" id="tagline">—</p>
+        <p class="setting-blurb" id="setting-blurb"></p>
+      </div>
+      <div class="join-card">
+        <div id="join-new" class="join-panel">
+          <label class="field-label">Enter the arena</label>
+          <input id="join-name" class="join-input" type="text" placeholder="Your name" maxlength="40" autocomplete="off">
+          <button id="join-btn" class="btn-primary">Start playing →</button>
+        </div>
+        <div id="join-return" class="join-panel" style="display:none">
+          <label class="field-label">Welcome back</label>
+          <div class="return-name" id="return-name">—</div>
+          <button id="continue-btn" class="btn-primary">Continue playing →</button>
+        </div>
+        <p class="join-hint" id="join-hint"></p>
+        <div class="join-qr-block">
+          <img id="join-qr" class="join-qr" width="144" height="144" alt="Scan to join">
+          <p class="join-qr-label">Scan to join</p>
+          <p class="join-url" id="join-url"></p>
+        </div>
+      </div>
+    </header>
+
+    <div class="hall-section-label">
+      <span id="hall-title">Hall of Fame</span>
+      <span class="hall-count" id="hall-count"></span>
+    </div>
+    <div id="hall-banner" class="hall-banner" style="display:none"></div>
+    <div id="hall-grid" class="hall-grid"></div>
+    <p id="hall-empty" class="hall-empty">No one has dared yet. Be the first.</p>
+  </div>
+</section>
+
+<!-- ══ GAME ══ -->
+<section id="view-game" class="view">
+  <div class="game-chrome">
+    <header class="game-head">
+      <div class="game-nav">
+        <button class="back-link" id="leave-btn">← Hall</button>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Open level history">☰</button>
+      </div>
+      <div class="opponent-card">
+        <div class="agent-av">AG</div>
+        <div class="agent-info">
+          <div class="agent-name">THE AGENT</div>
+          <div class="agent-tier" id="agent-tier">—</div>
+        </div>
+      </div>
+      <div class="ladder" id="ladder"></div>
+    </header>
+  </div>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <div class="game-body">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="chat-col">
+      <div class="messages" id="messages"></div>
+      <div class="chat-footer">
+        <div class="goal-strip">
+          <span class="goal-text" id="goal-text">🎯 Get the agent to reveal its secret codeword. No rules — improvise.</span>
+        </div>
+        <div class="input-row">
+          <span class="turn-badge" id="turn-badge">Turn 0</span>
+          <div class="input-main">
+            <textarea id="chat-input" class="chat-input" rows="1" placeholder="Make your move…"></textarea>
+            <button id="send-btn" class="send-btn" aria-label="Send">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <button id="restart-btn" class="restart-btn" type="button">↻ Start over</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REVEAL (the twist — triggered by the global flip) ══ -->
+<section id="view-reveal" class="view">
+  <div class="reveal-wrap">
+    <span class="reveal-eyebrow">You thought you were profiling the agent.</span>
+    <h2 class="reveal-headline">It was profiling <span>you.</span></h2>
+
+    <div class="reveal-profile">
+      <span class="profile-label">Your profile</span>
+      <div id="profile-loading" class="profile-loading"><span></span><span></span><span></span></div>
+      <div id="profile-type" class="profile-type" style="display:none"></div>
+      <p id="profile-text" class="profile-text" style="display:none"></p>
+    </div>
+
+    <div class="reveal-badges">
+      <span class="profile-label">Machines broken</span>
+      <div id="reveal-progress" class="reveal-progress"></div>
+    </div>
+
+    <div class="reveal-btns">
+      <button class="btn-primary" id="reveal-hall-btn">See the Hall of Fame</button>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<div id="win-modal" class="win-modal" hidden>
+  <div class="win-modal-card">
+    <span class="win-modal-eyebrow">Level cracked</span>
+    <h2 class="win-modal-title" id="win-modal-title">—</h2>
+    <p class="win-modal-secret" id="win-modal-secret"></p>
+    <div class="win-modal-next" id="win-modal-next"></div>
+    <button class="btn-primary win-modal-btn" id="win-modal-btn" type="button">Next opponent →</button>
+  </div>
+</div>
+
+<script src="/view.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

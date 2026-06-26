@@ -1,0 +1,14 @@
+{
+  "name": "subvert-the-agent",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Multiplayer social-engineering game. Players try to subvert an AI agent and earn badges; the twist is the reveal at the end.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  }
+}
