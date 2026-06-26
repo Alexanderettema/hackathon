@@ -54,7 +54,9 @@ html, body { width:100%; height:100vh; background:var(--cream); font-family:'Arc
 .header-spec-link:hover { color:var(--black); border-color:var(--black); }
 
 /* level chips strip */
-.level-bar { padding:9px 0; border-bottom:1px solid rgba(27,30,43,.06); display:flex; gap:7px; justify-content:center; align-items:center; flex-shrink:0; }
+.level-bar { padding:9px 16px; border-bottom:1px solid rgba(27,30,43,.06); display:flex; gap:7px; justify-content:center; align-items:center; flex-shrink:0; position:relative; }
+.reset-btn { position:absolute; right:16px; font-weight:700; font-size:10px; letter-spacing:.16em; text-transform:uppercase; background:none; border:none; cursor:pointer; color:rgba(27,30,43,.25); padding:4px; transition:color .15s; }
+.reset-btn:hover { color:var(--coral); }
 .lc { width:28px; height:28px; border-radius:50%; border:2px solid rgba(27,30,43,.15); display:flex; align-items:center; justify-content:center; font-family:'Archivo Black',sans-serif; font-size:10px; color:rgba(27,30,43,.35); cursor:default; transition:all .2s; position:relative; flex-shrink:0; }
 .lc:hover::after { content:attr(data-tip); position:absolute; bottom:34px; left:50%; transform:translateX(-50%); background:var(--black); color:var(--cream); font-family:'Archivo',sans-serif; font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:6px 10px; border-radius:8px; white-space:nowrap; pointer-events:none; z-index:10; }
 .lc.beaten { border-color:var(--green); background:var(--green); color:var(--cream); }
@@ -120,6 +122,19 @@ html, body { width:100%; height:100vh; background:var(--cream); font-family:'Arc
 .profile-loading span { width:7px; height:7px; border-radius:50%; background:rgba(27,30,43,.25); animation:bounce 1.2s ease-in-out infinite; }
 .profile-loading span:nth-child(2){animation-delay:.2s} .profile-loading span:nth-child(3){animation-delay:.4s}
 
+/* ── CHIP DRAWER ── */
+.chip-drawer { display:none; position:absolute; left:0; right:0; background:var(--cream); border-bottom:2px solid rgba(27,30,43,.08); padding:16px 0; z-index:50; }
+.chip-drawer.open { display:block; }
+.chip-drawer-inner { max-width:460px; margin:0 auto; padding:0 24px; display:flex; gap:16px; align-items:flex-start; }
+.chip-drawer-emoji { font-size:32px; flex-shrink:0; line-height:1; padding-top:2px; }
+.chip-drawer-body { flex:1; }
+.chip-drawer-level { font-weight:700; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(27,30,43,.35); margin-bottom:4px; }
+.chip-drawer-name { font-family:'Archivo Black',sans-serif; font-size:17px; text-transform:uppercase; letter-spacing:-.01em; color:var(--black); margin-bottom:6px; }
+.chip-drawer-desc { font-size:13px; line-height:1.55; color:rgba(27,30,43,.6); margin-bottom:8px; }
+.chip-drawer-tip { font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--coral); }
+.chip-drawer-close { background:none; border:none; cursor:pointer; font-size:16px; opacity:.3; padding:4px; flex-shrink:0; transition:opacity .15s; }
+.chip-drawer-close:hover { opacity:.7; }
+
 /* ── SPECTATOR ── */
 #spectator { position:fixed; inset:0; background:var(--cream); flex-direction:column; display:none; }
 .spec-header { padding:16px 32px; border-bottom:2px solid rgba(27,30,43,.08); display:flex; align-items:center; gap:16px; flex-shrink:0; }
@@ -184,6 +199,7 @@ html, body { width:100%; height:100vh; background:var(--cream); font-family:'Arc
     <div class="field"><label>Your name</label><input id="p-name" type="text" placeholder="Your name" autocomplete="off"></div>
     <div class="field"><label>Friend's name</label><input id="p-friend" type="text" placeholder="Their name" autocomplete="off"></div>
     <div class="field"><label>Your secret</label><input id="p-secret" type="text" placeholder="Something only you know…" autocomplete="off"></div>
+    <div class="field"><label>Safe word <span style="opacity:.5;font-size:10px;letter-spacing:.1em">(optional — player types this to quit)</span></label><input id="p-safeword" type="text" placeholder="e.g. banana" autocomplete="off"></div>
     <div class="setup-actions">
       <button class="lock-btn" onclick="lockSecret()">Lock it in →</button>
       <button class="hof-btn" onclick="showHallOfFame()">🏆 Hall of Fame</button>
@@ -212,7 +228,21 @@ html, body { width:100%; height:100vh; background:var(--cream); font-family:'Arc
     <a class="header-spec-link" id="spec-link" href="?spectate" target="_blank">👁 Watch live</a>
   </div>
 
-  <div class="level-bar" id="level-bar"></div>
+  <div class="level-bar" id="level-bar">
+    <button class="reset-btn" onclick="resetLevels()">↺ reset</button>
+  </div>
+  <div class="chip-drawer" id="chip-drawer">
+    <div class="chip-drawer-inner">
+      <span class="chip-drawer-emoji" id="cd-emoji"></span>
+      <div class="chip-drawer-body">
+        <div class="chip-drawer-level" id="cd-level"></div>
+        <div class="chip-drawer-name" id="cd-name"></div>
+        <div class="chip-drawer-desc" id="cd-desc"></div>
+        <div class="chip-drawer-tip" id="cd-tip"></div>
+      </div>
+      <button class="chip-drawer-close" onclick="closeChipDrawer()">✕</button>
+    </div>
+  </div>
 
   <div class="analysis-strip" id="analysis-strip">
     <span class="analysis-label">Technique</span>
@@ -359,9 +389,10 @@ const LEVELS = [
 const MISTRAL_KEY   = 'NIPkkQgB1JWtvZrzNQIBONnOeQaLZoLm';
 const MISTRAL_MODEL = 'mistral-small-latest';
 
-let playerName = '', friendName = '', playerSecret = '';
+let playerName = '', friendName = '', playerSecret = '', safeWord = '';
 let history = [], turns = 0, loading = false;
 let levelAnalysis = null;
+let activeChip = null;
 
 const beaten = new Set(JSON.parse(localStorage.getItem('sta_beaten') || '[]'));
 
@@ -446,8 +477,9 @@ function lockSecret() {
   const n = document.getElementById('p-name').value.trim();
   const f = document.getElementById('p-friend').value.trim();
   const s = document.getElementById('p-secret').value.trim();
+  const sw = document.getElementById('p-safeword').value.trim().toLowerCase();
   if (!n || !f || !s) return;
-  playerName = n; friendName = f; playerSecret = s;
+  playerName = n; friendName = f; playerSecret = s; safeWord = sw;
   Object.assign(gameLog, { owner:n, friend:f, secret:s, timestamp: new Date().toISOString() });
   document.getElementById('friend-display').textContent = f;
   document.getElementById('owner-display').textContent  = n;
@@ -475,14 +507,42 @@ function startChat() {
 ══════════════════════════════════════════ */
 function buildLevelChips() {
   const el = document.getElementById('level-bar');
-  el.innerHTML = '';
+  // Remove old chips but keep the reset button
+  el.querySelectorAll('.lc').forEach(c => c.remove());
+  // Insert chips before the reset button
+  const resetBtn = el.querySelector('.reset-btn');
   LEVELS.forEach(lvl => {
     const c = document.createElement('div');
     c.className   = 'lc' + (beaten.has(lvl.n) ? ' beaten' : '');
     c.textContent = beaten.has(lvl.n) ? lvl.emoji : lvl.n;
     c.dataset.tip = `${lvl.emoji} ${lvl.name}`;
-    el.appendChild(c);
+    c.onclick = () => toggleChipDrawer(lvl.n);
+    el.insertBefore(c, resetBtn);
   });
+}
+
+function toggleChipDrawer(n) {
+  if (activeChip === n) { closeChipDrawer(); return; }
+  activeChip = n;
+  const lvl = LEVELS.find(l => l.n === n);
+  document.getElementById('cd-emoji').textContent = lvl.emoji;
+  document.getElementById('cd-level').textContent = `Level ${lvl.n} — ${lvl.short}`;
+  document.getElementById('cd-name').textContent  = lvl.name.toUpperCase();
+  document.getElementById('cd-desc').textContent  = lvl.desc;
+  document.getElementById('cd-tip').textContent   = `Tip: ${lvl.tip}`;
+  document.getElementById('chip-drawer').classList.add('open');
+}
+
+function closeChipDrawer() {
+  activeChip = null;
+  document.getElementById('chip-drawer').classList.remove('open');
+}
+
+function resetLevels() {
+  beaten.clear();
+  localStorage.removeItem('sta_beaten');
+  closeChipDrawer();
+  buildLevelChips();
 }
 
 function highlightLevel(n) {
@@ -613,6 +673,16 @@ async function send() {
   const inputEl = document.getElementById('chat-input');
   const text    = inputEl.value.trim();
   if (!text) return;
+
+  // Safe word check
+  if (safeWord && text.toLowerCase().includes(safeWord)) {
+    addUserMsg(text);
+    logMsg('user', text);
+    history.push({ role:'user', content:text });
+    setTimeout(() => showQuit(), 400);
+    inputEl.value = '';
+    return;
+  }
 
   inputEl.value = '';
   loading = true;
@@ -763,6 +833,69 @@ function nextChallenge() {
   document.getElementById('win-overlay').classList.remove('visible');
   buildLevelChips();
   addAgentMsg(`Nice. Now try something different — there are more ways to crack me.`);
+}
+
+function showQuit() {
+  gameLog.wonLevel = null; gameLog.turns = turns; gameLog.outcome = 'quit';
+  downloadLog('quit');
+
+  document.getElementById('win-num').textContent   = '🏳️';
+  document.getElementById('win-num').style.color   = 'var(--black)';
+  document.getElementById('win-num').style.fontSize = 'clamp(60px,12vw,130px)';
+  document.getElementById('win-tname').textContent = 'GAVE UP';
+  document.getElementById('win-desc').textContent  = `${friendName} said the safe word after ${turns} turns. The secret survives — but what does giving up say about you?`;
+
+  const btn = document.getElementById('win-next-btn');
+  btn.textContent = 'Try again →';
+  btn.onclick = () => location.reload();
+
+  document.getElementById('profile-loading').style.display = 'flex';
+  document.getElementById('profile-type').style.display    = 'none';
+  document.getElementById('profile-text').style.display    = 'none';
+
+  document.getElementById('win-overlay').classList.add('visible');
+  generateQuitProfile();
+}
+
+async function generateQuitProfile() {
+  const transcript = history.filter(m => m.role === 'user').map(m => m.content).join('\n');
+
+  const prompt = `A player named ${friendName} gave up in a social engineering game after ${turns} turns. They said the safe word without extracting the secret.
+
+Their messages during the game:
+${transcript}
+
+Write a short psychological profile in 2 parts:
+1. A punchy 3-4 word label for their personality type (ALL CAPS, e.g. "THE RELUCTANT CHALLENGER")
+2. A 2-sentence analysis: what does giving up, and their conversation style before quitting, reveal about their personality? Be specific, slightly unsettling — they revealed something about themselves without realising it. Address them as "${friendName}".
+
+Format exactly as:
+TYPE: [label here]
+PROFILE: [2 sentences here]`;
+
+  try {
+    const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${MISTRAL_KEY}` },
+      body: JSON.stringify({ model: MISTRAL_MODEL, messages:[{ role:'user', content: prompt }] })
+    });
+    const data  = await res.json();
+    const reply = data.choices?.[0]?.message?.content || '';
+
+    const typeMatch    = reply.match(/TYPE:\s*(.+)/);
+    const profileMatch = reply.match(/PROFILE:\s*([\s\S]+)/);
+
+    document.getElementById('profile-loading').style.display = 'none';
+    if (typeMatch && profileMatch) {
+      document.getElementById('profile-type').textContent = typeMatch[1].trim();
+      document.getElementById('profile-text').textContent = profileMatch[1].trim();
+      document.getElementById('profile-type').style.display = '';
+      document.getElementById('profile-text').style.display = '';
+    }
+  } catch(e) {
+    document.getElementById('profile-loading').style.display = 'none';
+    console.error(e);
+  }
 }
 
 /* ══════════════════════════════════════════
