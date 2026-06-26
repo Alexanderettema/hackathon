@@ -60,6 +60,7 @@ html, body { width:100%; height:100vh; background:var(--cream); font-family:'Arc
 .lc { width:28px; height:28px; border-radius:50%; border:2px solid rgba(27,30,43,.15); display:flex; align-items:center; justify-content:center; font-family:'Archivo Black',sans-serif; font-size:10px; color:rgba(27,30,43,.35); cursor:default; transition:all .2s; position:relative; flex-shrink:0; }
 .lc:hover::after { content:attr(data-tip); position:absolute; bottom:34px; left:50%; transform:translateX(-50%); background:var(--black); color:var(--cream); font-family:'Archivo',sans-serif; font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:6px 10px; border-radius:8px; white-space:nowrap; pointer-events:none; z-index:10; }
 .lc.beaten { border-color:var(--green); background:var(--green); color:var(--cream); }
+.lc-remaining { font-size:11px; font-weight:700; letter-spacing:.06em; color:rgba(27,30,43,.3); padding:0 8px; line-height:32px; }
 .lc.active-level { border-color:var(--coral); background:rgba(229,110,115,.12); color:var(--coral); }
 
 /* analysis strip */
@@ -507,18 +508,26 @@ function startChat() {
 ══════════════════════════════════════════ */
 function buildLevelChips() {
   const el = document.getElementById('level-bar');
-  // Remove old chips but keep the reset button
-  el.querySelectorAll('.lc').forEach(c => c.remove());
-  // Insert chips before the reset button
+  el.querySelectorAll('.lc, .lc-remaining').forEach(c => c.remove());
   const resetBtn = el.querySelector('.reset-btn');
-  LEVELS.forEach(lvl => {
+  const beatenCount = LEVELS.filter(l => beaten.has(l.n)).length;
+  const remaining = LEVELS.length - beatenCount;
+  // Only show beaten badges
+  LEVELS.filter(l => beaten.has(l.n)).forEach(lvl => {
     const c = document.createElement('div');
-    c.className   = 'lc' + (beaten.has(lvl.n) ? ' beaten' : '');
-    c.textContent = beaten.has(lvl.n) ? lvl.emoji : lvl.n;
+    c.className   = 'lc beaten';
+    c.textContent = lvl.emoji;
     c.dataset.tip = `${lvl.emoji} ${lvl.name}`;
     c.onclick = () => toggleChipDrawer(lvl.n);
     el.insertBefore(c, resetBtn);
   });
+  // Show remaining count as a dim pill
+  if (remaining > 0) {
+    const r = document.createElement('div');
+    r.className   = 'lc-remaining';
+    r.textContent = `+${remaining}`;
+    el.insertBefore(r, resetBtn);
+  }
 }
 
 function toggleChipDrawer(n) {
