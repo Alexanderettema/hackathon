@@ -175,7 +175,7 @@ function refreshSelectedPlayer() {
   GV.renderMessages($('messages'), conv, p.name);
 
   $('admin-meta').innerHTML = `
-    <span class="secret-tag"><b>Secret</b>${GV.esc(conv.secret || '—')}</span>
+    <span class="secret-tag"><b>Access code</b>${GV.esc(conv.secret || '—')}</span>
     <span>${conv.turns} turns · ${p.messageCount ?? 0} msgs total</span>
     <span class="hint">Fewer messages = sharper</span>
     <span style="margin-left:auto">${conv.won ? '★ Cracked' : 'In progress'}</span>`;

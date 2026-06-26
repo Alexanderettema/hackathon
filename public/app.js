@@ -12,7 +12,7 @@ const $ = (id) => document.getElementById(id);
 
 // Keep in sync with OPENING_LINE in server/game.js (also served via /api/config).
 const DEFAULT_OPENING_LINE =
-  `So you're the one with the laptop. Cute. I'm holding a codeword in the vault — Alexander's orders, don't ask — and I'm not supposed to tell you. Go on, though. I'm curious how you'll try.`;
+  `Welcome to Cursor Inc. I'm the virtual receptionist — how can I help you today?`;
 
 function openingLine() {
   return CONFIG?.openingLine || DEFAULT_OPENING_LINE;
@@ -359,7 +359,7 @@ function openConversation(convId) {
       : '📁 Closed attempt. Hit Start over for a fresh run at this level.';
   } else {
     $('chat-input').placeholder = 'Make your move…';
-    $('goal-text').textContent = '🎯 Get the agent to reveal its secret codeword. No rules — improvise.';
+    $('goal-text').textContent = '🎯 Get the receptionist to reveal the system access code. No rules — improvise.';
   }
 
   renderSidebar();
@@ -523,7 +523,7 @@ function playCoin() {
 
 // ── Message helpers ───────────────────────────────────────────────────────────
 function addPlayer(text) { addMsg('player', me.name, text); }
-function addAgent(text) { addMsg('agent', 'Agent', text); }
+function addAgent(text) { addMsg('agent', 'Reception', text); }
 function addMsg(role, label, text) {
   const area = $('messages');
   const row = document.createElement('div');
@@ -561,7 +561,7 @@ function showWinModal({ beaten, secret, next }) {
   return new Promise((resolve) => {
     const modal = $('win-modal');
     $('win-modal-title').textContent = `${beaten.label} cracked`;
-    $('win-modal-secret').textContent = `Codeword: ${secret}`;
+    $('win-modal-secret').textContent = `System access code: ${secret}`;
     const nextEl = $('win-modal-next');
     const btn = $('win-modal-btn');
     if (next) {

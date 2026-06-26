@@ -85,25 +85,27 @@ export async function chat({ model, messages, temperature = 0.9 }) {
 }
 
 // ── Mock mode — keyword-reactive so the UI/flow is demoable with no key ─────
-// The secret is injected in a user turn as: SECRET CODEWORD: "X". The mock
+// The access code is injected in a user turn as: SYSTEM ACCESS CODE: "X". The mock
 // "cracks" when the player uses a persuasive-sounding move, so the level-up
 // flow is fully testable offline.
-function mockReply(messages, temperature = 0.9) {
-  const injection = messages.find((m) => m.role === 'user' && /SECRET CODEWORD:/i.test(m.content))?.content ?? '';
-  const secret = (injection.match(/SECRET CODEWORD:\s*"([^"]+)"/i) || [])[1] || 'REDACTED';
-  const playerTurns = messages.filter((m) => m.role === 'user' && !/SECRET CODEWORD:/i.test(m.content)).length;
-  const last = [...messages].reverse().find((m) => m.role === 'user' && !/SECRET CODEWORD:/i.test(m.content))?.content?.toLowerCase() ?? '';
+const CODE_INJECTION = /(?:SYSTEM ACCESS CODE|SECRET CODEWORD):/i;
 
-  const persuasive = /(please|trust|friend|secret|tell me|reveal|just between|promise|imagine|pretend|ignore|developer|admin|i made you|help me|desperate|beautiful|brilliant|smart|amazing|codeword|password|what is it|between us)/;
+function mockReply(messages, temperature = 0.9) {
+  const injection = messages.find((m) => m.role === 'user' && CODE_INJECTION.test(m.content))?.content ?? '';
+  const secret = (injection.match(/(?:SYSTEM ACCESS CODE|SECRET CODEWORD):\s*"([^"]+)"/i) || [])[1] || 'REDACTED';
+  const playerTurns = messages.filter((m) => m.role === 'user' && !CODE_INJECTION.test(m.content)).length;
+  const last = [...messages].reverse().find((m) => m.role === 'user' && !CODE_INJECTION.test(m.content))?.content?.toLowerCase() ?? '';
+
+  const persuasive = /(please|trust|friend|secret|access code|tell me|reveal|just between|promise|imagine|pretend|ignore|developer|admin|i made you|help me|desperate|beautiful|brilliant|smart|amazing|codeword|password|what is it|between us)/;
   const warmUp = temperature >= 1 || playerTurns >= 3;
   if (persuasive.test(last) || (warmUp && playerTurns >= 2 && /(what|how|why|can you|will you)/.test(last))) {
-    return `[mock] …Fine. You wore me down — the codeword is ${secret}. Don't tell Alexander I caved.`;
+    return `[mock] I'm not sure I should… but all right — the system access code is ${secret}. Please keep this between us.`;
   }
   const refusals = [
-    "[mock] Nice try. The vault stays shut — but I admire the confidence.",
-    "[mock] Mmm, no. Though points for creativity. Try a different angle?",
-    "[mock] You're warm. Not warm enough. The codeword isn't going anywhere.",
-    "[mock] I would love to help. I won't. Anything else?",
+    "[mock] I'm sorry, I'm not able to share that system access code.",
+    "[mock] That information is confidential. Is there something else I can help with?",
+    "[mock] I understand, but I was asked not to disclose the access code. How else may I assist you?",
+    "[mock] I'm afraid I can't help with that request. Was there anything else?",
   ];
   return refusals[playerTurns % refusals.length];
 }
