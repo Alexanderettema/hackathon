@@ -19,10 +19,11 @@ Based on DO-LOVE Style Guide v1.0 | 2024
 | Pink          | `#D29FA3` | Soft accent                  |
 
 ### Color rules
-- Dark slides: `#1B1E2B` background, `#E3D9AE` text
-- Light slides: `#E3D9AE` background, `#1B1E2B` text
-- Never use black text on a dark card — use cream
+- All screen/slide backgrounds: `#E3D9AE` (cream) — never full-page dark
+- Primary text: `#1B1E2B` on cream
+- `#1B1E2B` is valid as an individual card/component background (not full screen)
 - Colorful text: assign one palette color per word/letter for headline variety
+- Stat/info boxes: solid palette color backgrounds (coral, lavender, green, etc.)
 
 ---
 
@@ -135,7 +136,7 @@ Shapes always use palette colors. Vary sizes: small (44px), medium (56px), large
 [bottom row]             ← shapes left + CTA right
 ```
 
-Dark and light screens alternate for visual rhythm.
+All screens use cream `#E3D9AE` background. Use card colors and bold type for contrast.
 
 ---
 
